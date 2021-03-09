@@ -2,9 +2,36 @@ package main
 
 import (
 	"fmt"
+	"gotest/add"
 	"math"
 	"time"
+	"github.com/jinzhu/configor"
 )
+
+type person struct {
+
+	name string
+	age int
+}
+
+type rectangle struct {
+	length, width int
+}
+
+func (rect rectangle) area() int {
+	return rect.length * rect.width
+}
+
+func (rect *rectangle) cir() int {
+	return 2 * (rect.length + rect.width)
+}
+
+func newPerson(name string) *person {
+	p := person{name : name}
+	p.age = 33
+	return &p
+
+}
 
 func isStatus(status string) string {
 	switch status {
@@ -18,6 +45,50 @@ func isStatus(status string) string {
 		return  "false status"
 	}
 
+}
+
+func plus2(a, b int) int {
+	return a + b
+}
+func plus3(a, b, c int) int {
+	return a + b + c
+}
+
+func re2() (int, int) {
+	return 38, 88
+}
+
+func sumf(nums ...int) {
+	fmt.Print(nums)
+	total := 0
+	for _, num := range nums {
+		total += num
+	}
+	fmt.Println(total)
+}
+
+func intSeq() func() int {
+	i := 10
+	fmt.Println("i now is:", i)
+	return func() int {
+		i += 3
+		return i
+	}
+}
+
+func fab(n int) int {
+	if n == 0 {
+		return 1
+	}
+	return n * fab(n - 1)
+}
+
+func zeroval(i int) {
+	i = 0
+}
+
+func zeroptr(i *int) {
+	*i = 0
 }
 
 func main() {
@@ -192,6 +263,140 @@ func main() {
 
 	fmt.Println("############## Maps ###############")
 
+	ma1 := make(map[string]int)
+
+	ma1["k1"] = 5
+	ma1["k2"] = 12
+
+	fmt.Println(ma1, ma1["k1"], ma1["k2"])
+
+	v2 := ma1["k2"]
+	fmt.Println("v2 :", v2)
+	fmt.Println("length :", len(ma1))
+
+	vv, retur := ma1["k1"]
+	fmt.Println("retur :", retur, "vv :", vv)
+
+	n := map[int]string{1: "xx", 2: "oo", 3: "xxoo"}
+	fmt.Println(n)
+
+	fmt.Println("############### Range ################")
+
+	nums := []int{3, 5, 8, 13}
+	sum := 0
+	for index, t := range nums {
+		sum += t
+		fmt.Println(index, ":", t)
+	}
+	fmt.Println("sum is:", sum)
+
+	for index, t := range nums {
+		if t == 8 {
+			fmt.Println("num 8 index is:", index)
+		}
+	}
+	kvs := map[string]string{"a" : "apple", "b" : "banana"}
+	for k, v := range kvs {
+		fmt.Printf("%s -> %s\n", k, v)
+	}
+	for k := range  kvs {
+		fmt.Println("key :", k)
+	}
+	for i, c := range "go" {
+		fmt.Println(i,c)
+	}
+
+	fmt.Println("############# func #############")
+
+	var in int = 3
+	fmt.Printf("in is %d\n", in)
+
+	res2 := plus2(3, 8)
+	fmt.Println("3 + 8 =", res2)
+	res3 := plus3(2, 4, 6)
+	fmt.Println("2 + 4 + 8 =", res3)
+
+	r1, r2 := re2()
+	fmt.Println(r1, r2)
+	ree1, _ := re2()
+	fmt.Println(ree1)
+
+	fmt.Println("####### variadic functions ######")
+	sumf(1,3,6,8)
+
+	num1 := []int{2,6,19,14}
+	sumf(num1...)           // call slice argument as funcname(slice...)
+
+	fmt.Println("########### Closures ###########")
+	closure := intSeq()
+
+	fmt.Println(closure())
+	fmt.Println(closure())
+	fmt.Println(closure())
+
+	closurenew := intSeq()
+	fmt.Println(closurenew())
+
+	fmt.Println("############# fab-recursive ###########")
+	fmt.Println("fab(7) is:", fab(7))
+
+	fmt.Println("################ pointer ##############")
+	ia := 3
+
+	fmt.Println("before func:", &ia, ia)
+
+	zeroval(ia)
+	fmt.Println("after zeroval:", &ia, ia)
+
+	zeroptr(&ia)
+	fmt.Println("after zeroptr:", &ia, ia)
+
+	fmt.Println("############### struct ##############")
+
+	fmt.Println(person{name : "burgess", age : 66})
+	fmt.Println(person{name : "zhu"})
+	fmt.Println(&person{age : 38})
+	fmt.Println(newPerson("burgess-zhu"))
+
+	ss := person{name : "wangling", age : 26}
+	fmt.Println(ss)
+	fmt.Print(ss.name, "\n", ss.age, "\n")
+	ssp := &ss
+	ssp.age = 100
+	fmt.Println(ssp)
+	fmt.Println(ssp.age)
+
+	fmt.Println("############### methods #############")
+	pp := rectangle{length:8, width : 23}
+	fmt.Println(pp.area())
+	fmt.Println(pp.cir())
+
+	pptr := &pp
+	fmt.Println(pptr.area())
+	fmt.Println(pptr.cir())
 
 
+	fmt.Println("############### channel ##############")
+	messages := make(chan string)
+
+	go func() {messages <- "go channel"}()
+	msg := <- messages
+	fmt.Println(msg)
+
+	messages2 := make(chan string, 3)
+
+	messages2 <- "burgess"
+	messages2 <- "zhu"
+	messages2 <- "!"
+
+	fmt.Println(<- messages2)
+	fmt.Println(<- messages2)
+	fmt.Println(<- messages2)
+
+	fmt.Println(">>>>>>>>>>>>>>> call func from funcTocall <<<<<<<<<<<<<<<<")
+//	call("burgess zhu")
+	ccc := add.Add(3.1, 4.4)
+	fmt.Println(ccc)
+	fmt.Println("执行github的外部函数 ：", configor.Config{})
 }
+
